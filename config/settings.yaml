@@ -1,0 +1,16 @@
+# config/settings.yaml
+
+# LLM and embedding settings
+llm_model: "llama-3.3-70b-versatile"
+embedding_model: "BGE-large-en"
+reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+# DB settings
+vector_store_dir: "chroma_db"
+bm25_index_dir: "whoosh_index"
+
+# Retrieval settings
+top_k_retrieval: 5
+
+# Self-refine settings
+max_refine_iterations: 2

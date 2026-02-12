@@ -1,0 +1,11 @@
+1. Governing Law: This Agreement shall be governed by the laws of [Jurisdiction] without regard to conflict of laws provisions.
+
+2. Confidentiality: Each party shall keep confidential all proprietary information of the other party and shall not disclose it to any third party without prior written consent.
+
+3. Termination: Either party may terminate this Agreement upon thirty (30) days written notice to the other party in the event of a material breach that is not cured within such period.
+
+4. Indemnification: The Contractor agrees to indemnify and hold harmless the Client from any liabilities, losses, damages, costs, or expenses arising out of any breach of this Agreement or negligence.
+
+5. Data Sharing (Non-Compliant): The company may share customer personal data with third parties without requiring explicit consent from the customer.
+
+6. Marketing Communications (Non-Compliant): The company may automatically enroll customers into marketing emails without giving them a clear option to opt out.

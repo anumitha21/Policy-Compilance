@@ -1,0 +1,35 @@
+# Core
+python-dotenv
+PyYAML
+
+# LangGraph
+langgraph
+
+# Embeddings and LLM
+langchain
+sentence-transformers
+huggingface-hub
+transformers
+torch
+
+
+# Vector DB
+chromadb
+
+# Reranker / BM25
+whoosh
+
+# API
+fastapi
+uvicorn
+pydantic
+requests
+python-dotenv
+
+# UI
+streamlit
+
+# Testing
+pytest
+#llm
+groq
