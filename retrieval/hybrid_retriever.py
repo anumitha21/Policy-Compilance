@@ -2,10 +2,10 @@
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser
-from embeddings.vector_store import VectorStore
+from embeddings.vector_store import PolicyVectorStore
 
 class HybridRetriever:
-    def __init__(self, vector_store: VectorStore, index_dir="whoosh_index"):
+    def __init__(self, vector_store: PolicyVectorStore, index_dir="whoosh_index"):
         self.vector_store = vector_store
         self.index_dir = index_dir
 

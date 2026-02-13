@@ -1,7 +1,7 @@
 # llm_client.py
 import os
 from dotenv import load_dotenv
-from groq_llm import GroqClient
+from groq import Groq
 
 # Load API key from .env
 load_dotenv()
@@ -11,7 +11,7 @@ if not GROQ_API_KEY:
     raise ValueError("Please set GROQ_API_KEY in your .env file")
 
 # Initialize Groq client
-client = GroqClient(api_key=GROQ_API_KEY)
+client = Groq(api_key=GROQ_API_KEY)
 
 class LLMClient:
     def __init__(self, model_name="llama-3.3-70b-versatile"):

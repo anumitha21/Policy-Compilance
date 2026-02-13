@@ -1,6 +1,7 @@
+
 # run_pipeline.py
-from embeddings.embedder import create_embeddings
-from embeddings.vector_store import ChromaVectorStore
+import os
+from embeddings.vector_store import PolicyVectorStore
 from retrieval.chunk_loader import ChunkLoader
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.reranker import Reranker
@@ -8,38 +9,59 @@ from llm_agents.compliance_agent import ComplianceAgent
 from llm_agents.risk_agent import RiskAgent
 from llm_agents.self_refine_agent import SelfRefineAgent
 from guardrails.hallucination_guard import HallucinationGuard
+from PyPDF2 import PdfReader
 
 # -----------------------------
-# 1. Load chunks
+# 0. Utility: Convert PDF → TXT
 # -----------------------------
-policy_chunks = ChunkLoader("data/policies/GDPR-Guidance.pdf")
+def pdf_to_text(pdf_path):
+    reader = PdfReader(pdf_path)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text() + "\n"
+    return text
+
+# -----------------------------
+# 1. Load policy and contract chunks
+# -----------------------------
+policy_pdf_path = "data/policies/GDPR-Guidance.pdf"
+policy_txt_path = "data/policies/GDPR-Guidance.txt"
+
+# Convert PDF to TXT if TXT does not exist
+if not os.path.exists(policy_txt_path):
+    policy_text = pdf_to_text(policy_pdf_path)
+    with open(policy_txt_path, "w", encoding="utf-8") as f:
+        f.write(policy_text)
+
+# Load chunks
+policy_chunks = ChunkLoader(policy_txt_path)
 contract_chunks = ChunkLoader("data/contracts/sample_contract_clauses.txt")
 
 policy_texts, policy_ids = policy_chunks.get_texts_and_ids()
 contract_texts, contract_ids = contract_chunks.get_texts_and_ids()
 
+# Convert IDs into metadata for Chroma
+policy_metadata = [{"id": cid} for cid in policy_ids]
+
 print(f"Loaded {len(policy_texts)} policy chunks")
 print(f"Loaded {len(contract_texts)} contract chunks")
 
 # -----------------------------
-# 2. Create embeddings & vector store
+# 2. Create vector store and add policy chunks
 # -----------------------------
-embedding_model_name = "BGE-large-en"
-embedder = create_embeddings(model_name=embedding_model_name)
+vector_store = PolicyVectorStore(persist_directory="chroma_db")
+vector_store.add_documents(policy_texts, policy_metadata)
 
-vector_store = ChromaVectorStore()
-vector_store.add_documents(policy_texts, policy_ids, embedder)
-
-print("Policy embeddings stored in Chroma DB")
+print("Policy chunks added to Chroma vector store")
 
 # -----------------------------
 # 3. Initialize retriever + reranker
 # -----------------------------
-retriever = HybridRetriever(vector_store=vector_store, top_k=5)
+retriever = HybridRetriever(vector_store=vector_store)
 reranker = Reranker(model_name="cross-encoder/ms-marco-MiniLM-L-6-v2")
 
 # -----------------------------
-# 4. Initialize agents
+# 4. Initialize LLM agents
 # -----------------------------
 llm_model_name = "llama-3.3-70b-versatile"
 compliance_agent = ComplianceAgent(llm_model=llm_model_name)

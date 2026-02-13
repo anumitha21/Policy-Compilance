@@ -1,12 +1,14 @@
 # Core
 python-dotenv
 PyYAML
+pyPDF2
 
 # LangGraph
 langgraph
 
 # Embeddings and LLM
 langchain
+langchain-chroma
 sentence-transformers
 huggingface-hub
 transformers
