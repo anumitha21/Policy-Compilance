@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from api.schemas import ClauseRequest, ClauseResponse
 from langgraph.graph import ContractCompliancePipeline
-from embeddings.vector_store import VectorStore
+from embeddings.vector_store import PolicyVectorStore
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.reranker import Reranker
 from llm_agents.compliance_agent import ComplianceAgent
@@ -17,7 +17,7 @@ with open("config/settings.yaml") as f:
     settings = yaml.safe_load(f)
 
 # Initialize components
-vector_store = VectorStore(persist_dir=settings["vector_store_dir"])
+vector_store = PolicyVectorStore(persist_directory=settings["vector_store_dir"])
 retriever = HybridRetriever(vector_store, index_dir=settings["bm25_index_dir"])
 reranker = Reranker()
 compliance_agent = ComplianceAgent(llm_model=settings["llm_model"])

@@ -20,12 +20,13 @@ class LLMClient:
 
     def generate(self, prompt: str, max_tokens: int = 512):
         """
-        Generates text using Groq LLM.
+        Generates text using Groq LLM (chat completion API).
         Returns the output text.
         """
-        response = self.client.generate(
+        response = self.client.chat.completions.create(
             model=self.model_name,
-            prompt=prompt,
+            messages=[{"role": "user", "content": prompt}],
             max_tokens=max_tokens
         )
-        return response.text
+        # The response object should have a .choices list with .message.content
+        return response.choices[0].message.content

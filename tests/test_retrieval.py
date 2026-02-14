@@ -1,7 +1,7 @@
 # tests/test_retrieval.py
 import pytest
 from retrieval.chunk_loader import ChunkLoader
-from embeddings.vector_store import VectorStore
+from embeddings.vector_store import PolicyVectorStore
 from retrieval.hybrid_retriever import HybridRetriever
 from retrieval.reranker import Reranker
 

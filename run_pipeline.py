@@ -40,6 +40,18 @@ contract_chunks = ChunkLoader("data/contracts/sample_contract_clauses.txt")
 policy_texts, policy_ids = policy_chunks.get_texts_and_ids()
 contract_texts, contract_ids = contract_chunks.get_texts_and_ids()
 
+
+
+# 1. Load chunks with tuned chunking
+# Policy: windowed chunking for context, Contract: clause-based chunking
+CHUNK_SIZE = 600
+CHUNK_OVERLAP = 150
+policy_chunks = ChunkLoader("data/policies/GDPR-Guidance.pdf", chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+contract_chunks = ChunkLoader("data/contracts/sample_contract_clauses.txt", clause_mode=True)
+
+policy_texts, policy_ids = policy_chunks.get_texts_and_ids()
+contract_texts, contract_ids = contract_chunks.get_texts_and_ids()
+
 # Convert IDs into metadata for Chroma
 policy_metadata = [{"id": cid} for cid in policy_ids]
 
@@ -88,13 +100,14 @@ for idx, clause in enumerate(contract_texts, start=1):
     risk_score = risk_agent.evaluate_risk(clause, reranked_chunks)
 
     # Run self-refine agent for verification
-    refined_output = self_refine_agent.refine(clause, reranked_chunks, compliance_result)
+    refined_output = self_refine_agent.refine(clause, compliance_result, reranked_chunks)
 
     # Apply hallucination guard
-    grounded_output = hall_guard.check(refined_output, reranked_chunks)
+    grounded_output = hall_guard.check_grounding(refined_output, reranked_chunks)
 
-    # Collect citations (chunk IDs)
-    citations = [chunk["id"] for chunk in reranked_chunks]
+
+    # Collect citations (chunk IDs) and deduplicate
+    citations = list(set(chunk["id"] for chunk in reranked_chunks))
 
     results.append({
         "clause": clause,

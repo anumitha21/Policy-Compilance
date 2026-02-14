@@ -6,6 +6,6 @@
 
 4. Indemnification: The Contractor agrees to indemnify and hold harmless the Client from any liabilities, losses, damages, costs, or expenses arising out of any breach of this Agreement or negligence.
 
-5. Data Sharing (Non-Compliant): The company may share customer personal data with third parties without requiring explicit consent from the customer.
+5. Data Sharing : The company may share customer personal data with third parties without requiring explicit consent from the customer.
 
-6. Marketing Communications (Non-Compliant): The company may automatically enroll customers into marketing emails without giving them a clear option to opt out.
+6. Marketing Communications : The company may automatically enroll customers into marketing emails without giving them a clear option to opt out.

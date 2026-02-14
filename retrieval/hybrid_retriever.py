@@ -43,8 +43,21 @@ class HybridRetriever:
         # Vector search
         vector_results = self.vector_store.similarity_search(query, k=top_k)
 
-        # Combine results (simple merge, can be weighted later)
-        combined_results = bm25_results + [
-            {"id": m["id"], "content": d} for d, m in zip(vector_results["documents"][0], vector_results["metadatas"][0])
-        ]
+        # Convert LangChain Document objects to dicts with 'id' and 'content'
+        def doc_to_dict(doc):
+            # Try to extract id from metadata if present
+            doc_id = doc.metadata.get("id") if hasattr(doc, "metadata") and isinstance(doc.metadata, dict) else None
+            return {"id": doc_id, "content": getattr(doc, "page_content", str(doc))}
+
+        if isinstance(vector_results, list):
+            if all(hasattr(item, "page_content") for item in vector_results):
+                vector_results_dicts = [doc_to_dict(doc) for doc in vector_results]
+                combined_results = bm25_results + vector_results_dicts
+            elif all(isinstance(item, dict) for item in vector_results):
+                combined_results = bm25_results + vector_results
+            else:
+                combined_results = bm25_results + [{"id": None, "content": str(doc)} for doc in vector_results]
+        else:
+            combined_results = bm25_results
+
         return combined_results[:top_k]

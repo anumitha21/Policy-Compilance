@@ -18,7 +18,7 @@ class HallucinationGuard:
         prompt = f"""
         You are a compliance expert. 
         Check if the following analysis output is fully supported by the given policy chunks.
-
+        And the has to be Output ONLY valid JSON, and nothing else.
         Output:
         {output_text}
 
@@ -34,11 +34,20 @@ class HallucinationGuard:
 
         response = self.llm.generate(prompt)
 
-        # For simplicity, assume the LLM returns valid JSON
-        import json
-        try:
-            result = json.loads(response)
-        except:
-            result = {"is_grounded": False, "issues": ["Failed to parse LLM response."]}
+        # Robust JSON extraction
+        import json, re
+        def extract_json(text):
+            # Try to find the first JSON object in the text
+            match = re.search(r'\{[\s\S]*\}', text)
+            if match:
+                try:
+                    return json.loads(match.group(0))
+                except Exception as e:
+                    return None
+            return None
+
+        result = extract_json(response)
+        if not result:
+            result = {"is_grounded": False, "issues": ["Failed to parse LLM response.", f"Raw: {response}"]}
 
         return result

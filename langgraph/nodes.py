@@ -44,7 +44,7 @@ def guardrails_node(state: ClauseAnalysisState):
     hall_guard = HallucinationGuard()
     state.grounding_check = hall_guard.check_grounding(state.refined_output, state.reranked_chunks)
 
-    valid_policies = [c["metadata"].get("policy_title", "Unknown") for c in state.reranked_chunks]
+    valid_policies = [c.get("metadata", {}).get("policy_title", "Unknown") for c in state.reranked_chunks]
     policy_guard = PolicyGuard(valid_policies)
     state.policy_check = policy_guard.filter_output(state.refined_output, state.citations)
 

@@ -5,8 +5,11 @@ from typing import List, Dict
 import PyPDF2  # for PDF reading
 
 class ChunkLoader:
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, chunk_size: int = 300, chunk_overlap: int = 50, clause_mode: bool = False):
         self.file_path = file_path
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+        self.clause_mode = clause_mode
         self.chunks = self._load_chunks()
 
     def _load_chunks(self) -> List[Dict]:
@@ -24,20 +27,47 @@ class ChunkLoader:
         else:
             raise ValueError("Unsupported file type. Must be .json, .txt, or .pdf")
 
-    def _load_txt(self) -> List[Dict]:
+    def _split_text(self, text: str) -> List[str]:
+        # Split text into overlapping chunks
         chunks = []
+        start = 0
+        length = len(text)
+        while start < length:
+            end = min(start + self.chunk_size, length)
+            chunk = text[start:end].strip()
+            if chunk:
+                chunks.append(chunk)
+            start += self.chunk_size - self.chunk_overlap
+        return chunks
+
+    def _load_txt(self) -> List[Dict]:
         with open(self.file_path, "r", encoding="utf-8") as f:
-            chunk_id = 0
-            for line in f:
-                line = line.strip()
-                if line:
-                    chunk_id += 1
+            full_text = f.read()
+        if self.clause_mode:
+            # Split by numbered clauses (e.g., '1. ...', '2. ...')
+            import re
+            clause_pattern = r"(?:^|\n)(\d+\. .+?)(?=(?:\n\d+\. )|\Z)"
+            matches = re.findall(clause_pattern, full_text, re.DOTALL)
+            chunks = []
+            for idx, clause in enumerate(matches, 1):
+                clause = clause.strip()
+                if clause:
                     chunks.append({
-                        "id": str(chunk_id),
-                        "text": line,
+                        "id": str(idx),
+                        "text": clause,
                         "metadata": {"source": os.path.basename(self.file_path)}
                     })
-        return chunks
+            return chunks
+        else:
+            text_chunks = self._split_text(full_text)
+            chunks = []
+            for idx, chunk in enumerate(text_chunks, 1):
+                chunks.append({
+                    "id": str(idx),
+                    "text": chunk,
+                    "metadata": {"source": os.path.basename(self.file_path)}
+                })
+            return chunks
 
     def _load_pdf(self) -> List[Dict]:
         chunks = []
@@ -47,18 +77,17 @@ class ChunkLoader:
             for page_num, page in enumerate(reader.pages, start=1):
                 text = page.extract_text()
                 if text:
-                    for line in text.split("\n"):
-                        line = line.strip()
-                        if line:
-                            chunk_id += 1
-                            chunks.append({
-                                "id": f"{page_num}-{chunk_id}",
-                                "text": line,
-                                "metadata": {
-                                    "source": os.path.basename(self.file_path),
-                                    "page": page_num
-                                }
-                            })
+                    text_chunks = self._split_text(text)
+                    for chunk in text_chunks:
+                        chunk_id += 1
+                        chunks.append({
+                            "id": f"{page_num}-{chunk_id}",
+                            "text": chunk,
+                            "metadata": {
+                                "source": os.path.basename(self.file_path),
+                                "page": page_num
+                            }
+                        })
         return chunks
 
     def get_chunks(self) -> List[Dict]:
