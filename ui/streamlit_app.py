@@ -1,43 +1,61 @@
-# ui/streamlit_app.py
 import streamlit as st
 import requests
 
-st.set_page_config(page_title="Contract Compliance AI", layout="wide")
+st.set_page_config(page_title="Contract Compliance AI", layout="centered")
+st.title("📑 Contract Compliance AI")
 
-st.title("Contract Compliance AI")
-st.write("Enter a contract clause and analyze compliance, risk, and policy citations.")
-
-clause_text = st.text_area("Contract Clause", height=150)
+clause_text = st.text_area("✍️ Contract Clause", height=150)
 
 if st.button("Analyze Clause"):
+
     if not clause_text.strip():
-        st.warning("Please enter a clause.")
+        st.warning("Please enter a contract clause.")
     else:
         with st.spinner("Analyzing clause..."):
-            # Call your local API
+
             try:
                 response = requests.post(
                     "http://localhost:8000/analyze_clause/",
                     json={"clause_text": clause_text}
                 )
-                if response.status_code == 200:
-                    result = response.json()
-                    st.subheader("✅ Refined Output")
-                    st.write(result["refined_output"])
 
-                    st.subheader("⚠️ Risk Score")
-                    st.write(result["risk_score"])
+                result = response.json()
 
-                    st.subheader("📄 Citations")
-                    for c in result["citations"]:
-                        st.write(f"- {c}")
+                # Clause
+                st.subheader("📜 Input Clause")
+                st.write(clause_text)
 
-                    st.subheader("🔍 Hallucination Check")
-                    st.write(result["grounding_check"])
+                # Compliance
+                st.subheader("✅ Compliance Analysis")
+                refined = result.get("refined_output", "")
 
-                    st.subheader("📌 Policy Validation Check")
-                    st.write(result["policy_check"])
+                if isinstance(refined, dict):
+                    compliance_text = refined.get("explanation", "No explanation")
                 else:
-                    st.error(f"API Error: {response.status_code}")
+                    compliance_text = refined
+
+                st.write(compliance_text)
+
+                # Risk Score
+                st.subheader("⚠️ Risk Score")
+                st.write(result.get("risk_score", "N/A"))
+
+                # Citations
+                st.subheader("📚 Policy Evidence")
+                citations = result.get("citations", [])
+                if citations:
+                    for c in citations:
+                        st.write(f"- Policy Chunk ID: {c}")
+                else:
+                    st.write("No citations")
+
+                # Verified Output
+                st.subheader("🧠 Verified AI Output")
+                ground = result.get("grounding_check", {})
+                if isinstance(ground, dict) and ground.get("is_grounded"):
+                    st.success("AI output grounded in policies.")
+                else:
+                    st.error("AI output may be hallucinated.")
+
             except Exception as e:
-                st.error(f"Failed to connect to API: {e}")
+                st.error(f"Backend not running: {e}")
