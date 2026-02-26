@@ -10,6 +10,7 @@ from llm_agents.risk_agent import RiskAgent
 from llm_agents.self_refine_agent import SelfRefineAgent
 from guardrails.hallucination_guard import HallucinationGuard
 from PyPDF2 import PdfReader
+from log import log_print
 
 # -----------------------------
 # 0. Utility: Convert PDF → TXT
@@ -57,6 +58,8 @@ policy_metadata = [{"id": cid} for cid in policy_ids]
 
 print(f"Loaded {len(policy_texts)} policy chunks")
 print(f"Loaded {len(contract_texts)} contract chunks")
+log_print(f"Loaded {len(policy_texts)} policy chunks")
+log_print(f"Loaded {len(contract_texts)} contract chunks")
 
 # -----------------------------
 # 2. Create vector store and add policy chunks
@@ -65,6 +68,7 @@ vector_store = PolicyVectorStore(persist_directory="chroma_db")
 vector_store.add_documents(policy_texts, policy_metadata)
 
 print("Policy chunks added to Chroma vector store")
+log_print("Policy chunks added to Chroma vector store")
 
 # -----------------------------
 # 3. Initialize retriever + reranker
@@ -87,7 +91,7 @@ hall_guard = HallucinationGuard(llm_model=llm_model_name)
 results = []
 
 for idx, clause in enumerate(contract_texts, start=1):
-    print(f"\nProcessing clause {idx}: {clause[:60]}...")
+    log_print(f"\nProcessing clause {idx}: {clause[:60]}...")
 
     # Retrieve relevant policy chunks
     retrieved_chunks = retriever.retrieve(clause)
@@ -120,7 +124,7 @@ for idx, clause in enumerate(contract_texts, start=1):
 # 6. Print results
 # -----------------------------
 for idx, res in enumerate(results, start=1):
-    print(f"\nClause {idx}: {res['clause'][:60]}...")
-    print(f"Compliance Output: {res['compliance']}")
-    print(f"Risk Score: {res['risk_score']}")
-    print(f"Citations: {res['citations']}")
+    log_print(f"\nClause {idx}: {res['clause'][:60]}...")
+    log_print(f"Compliance Output: {res['compliance']}")
+    log_print(f"Risk Score: {res['risk_score']}")
+    log_print(f"Citations: {res['citations']}")
