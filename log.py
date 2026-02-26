@@ -1,5 +1,5 @@
 import logging
-
+# added log file to debug and track the pipeline execution
 # Set up logging to file and console
 logging.basicConfig(
     level=logging.INFO,
