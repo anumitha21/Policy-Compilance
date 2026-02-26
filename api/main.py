@@ -34,16 +34,42 @@ app = FastAPI(title="Contract Compliance AI API")
 
 class ClauseRequest(BaseModel):
     clause_text: str
-@app.post("/analyze_clause/", response_model=ClauseResponse)
+from fastapi.responses import JSONResponse
+
+@app.post("/analyze_clause/")
 def analyze_clause(request: ClauseRequest):
     state = pipeline.run(request.clause_text)
-    return ClauseResponse(
-        refined_output=state.refined_output,
-        risk_score=state.risk_score,
-        citations=state.citations,
-        grounding_check=state.grounding_check,
-        policy_check=state.policy_check
-    )
+    # Parse compliance output
+    compliance = state.initial_output.get("compliance") if isinstance(state.initial_output, dict) else None
+    explanation = state.initial_output.get("explanation") if isinstance(state.initial_output, dict) else ""
+    # Only return if non-compliant
+    if compliance != "Non-Compliant":
+        return JSONResponse(content={"results": []})
+
+    # Prepare evidence (no repeated chunk IDs)
+    evidence = []
+    seen_chunks = set()
+    for chunk in state.reranked_chunks:
+        chunk_id = chunk.get("id")
+        if chunk_id in seen_chunks:
+            continue
+        seen_chunks.add(chunk_id)
+        meta = chunk.get("metadata", {})
+        evidence.append({
+            "source": meta.get("policy_title", "GDPR-Guidance"),
+            "article": meta.get("article", ""),
+            "chunk_id": chunk_id,
+            "excerpt": chunk.get("content", "")[:200]  # 1-2 lines only
+        })
+
+    result = {
+        "clause_name": request.clause_text.split(":")[0].strip(),
+        "compliance": compliance,
+        "explanation": explanation,
+        "risk_score": state.risk_score,
+        "policy_evidence": evidence
+    }
+    return JSONResponse(content={"results": [result]})
 
 @app.get("/")
 def root():

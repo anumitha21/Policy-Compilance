@@ -18,44 +18,21 @@ if st.button("Analyze Clause"):
                     "http://localhost:8000/analyze_clause/",
                     json={"clause_text": clause_text}
                 )
-
                 result = response.json()
-
-                # Clause
-                st.subheader("📜 Input Clause")
-                st.write(clause_text)
-
-                # Compliance
-                st.subheader("✅ Compliance Analysis")
-                refined = result.get("refined_output", "")
-
-                if isinstance(refined, dict):
-                    compliance_text = refined.get("explanation", "No explanation")
+                results = result.get("results", [])
+                if not results:
+                    st.info("No compliance risks detected for this clause.")
                 else:
-                    compliance_text = refined
-
-                st.write(compliance_text)
-
-                # Risk Score
-                st.subheader("⚠️ Risk Score")
-                st.write(result.get("risk_score", "N/A"))
-
-                # Citations
-                st.subheader("📚 Policy Evidence")
-                citations = result.get("citations", [])
-                if citations:
-                    for c in citations:
-                        st.write(f"- Policy Chunk ID: {c}")
-                else:
-                    st.write("No citations")
-
-                # Verified Output
-                st.subheader("🧠 Verified AI Output")
-                ground = result.get("grounding_check", {})
-                if isinstance(ground, dict) and ground.get("is_grounded"):
-                    st.success("AI output grounded in policies.")
-                else:
-                    st.error("AI output may be hallucinated.")
-
+                    for res in results:
+                        st.markdown(f"**Clause:** {res.get('clause_name', '')}")
+                        st.markdown(f"**Compliance:** {res.get('compliance', '')}")
+                        st.markdown(f"**Explanation:** {res.get('explanation', '')}")
+                        st.markdown(f"**Risk Score:** {res.get('risk_score', '')}")
+                        st.markdown("**Policy Evidence:**")
+                        for ev in res.get("policy_evidence", []):
+                            st.markdown(f"- Source: {ev.get('source', '')}")
+                            st.markdown(f"  - Article: {ev.get('article', '')}")
+                            st.markdown(f"  - Chunk ID: {ev.get('chunk_id', '')}")
+                            st.markdown(f"  - Excerpt: \"{ev.get('excerpt', '')}\"")
             except Exception as e:
                 st.error(f"Backend not running: {e}")
