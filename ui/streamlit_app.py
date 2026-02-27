@@ -21,18 +21,21 @@ if st.button("Analyze Clause"):
                 result = response.json()
                 results = result.get("results", [])
                 if not results:
-                    st.info("No compliance risks detected for this clause.")
+                    st.success("✅ No compliance risks detected.")
                 else:
+                    st.header("🚩 Flagged Clauses")
                     for res in results:
-                        st.markdown(f"**Clause:** {res.get('clause_name', '')}")
-                        st.markdown(f"**Compliance:** {res.get('compliance', '')}")
-                        st.markdown(f"**Explanation:** {res.get('explanation', '')}")
+                        st.markdown(f"### {res.get('clause_name', '')}")
+                        st.markdown(f"**Status:** {res.get('compliance', '')}")
                         st.markdown(f"**Risk Score:** {res.get('risk_score', '')}")
-                        st.markdown("**Policy Evidence:**")
+                        st.markdown(f"**Issue:** {res.get('explanation', '')[:120]}")
+                        st.markdown("**Policy Reference:**")
                         for ev in res.get("policy_evidence", []):
-                            st.markdown(f"- Source: {ev.get('source', '')}")
-                            st.markdown(f"  - Article: {ev.get('article', '')}")
-                            st.markdown(f"  - Chunk ID: {ev.get('chunk_id', '')}")
-                            st.markdown(f"  - Excerpt: \"{ev.get('excerpt', '')}\"")
+                            ref = f"{ev.get('source', '')}"
+                            if ev.get('article', ''):
+                                ref += f", Article {ev.get('article', '')}"
+                            ref += f" (ID: {ev.get('chunk_id', '')})"
+                            st.markdown(f"- {ref}")
+                            st.markdown(f"  _Excerpt_: \"{ev.get('excerpt', '')[:120]}\"")
             except Exception as e:
                 st.error(f"Backend not running: {e}")
