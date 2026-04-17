@@ -139,7 +139,6 @@ contract-compliance-ai/
 
 
 ---
-
 ## ⚙️ Setup
 
 ```bash
@@ -151,8 +150,15 @@ myenv\Scripts\activate
 
 pip install -r requirements.txt
 
-## ⚙️ Environment Setup
+Create .env file:
 
+GROQ_API_KEY=your_api_key
+▶️ Run
+Backend
+uvicorn api.main:app --reload
+Frontend
+cd ui
+streamlit run streamlit_app.py
 Create a `.env` file in the root directory:
 
 ```env
