@@ -1,147 +1,144 @@
-# 📑 Contract Compliance AI
+# 📑 Policy Compliance AI
 
-An AI-powered system that analyzes contract clauses against company policies using a Retrieval-Augmented Generation (RAG) pipeline. The system provides compliance classification, risk scoring, and policy-backed explanations while ensuring outputs are grounded and reliable.
+> An intelligent AI-powered system that analyzes contract clauses against company policies using Retrieval-Augmented Generation (RAG), providing compliance decisions, risk scoring, and policy-backed explanations with strong hallucination control.
 
----
-
-## 🚀 Overview
-
-This project evaluates contract clauses by comparing them with relevant policy documents (e.g., GDPR).
-
-The goal is to:
-- Ensure every AI decision is backed by policy evidence  
-- Prevent hallucinations using verification and guardrails  
-- Provide explainable compliance and risk analysis  
+![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green?logo=fastapi)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-red?logo=streamlit)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-VectorDB-purple)
+![Groq](https://img.shields.io/badge/Groq-LLaMA_3.3-orange)
 
 ---
 
-## 🔄 Workflow
+## 📌 Overview
 
-The system processes each contract clause through the following pipeline:
+**Contract Compliance AI** is a system that evaluates contract clauses by comparing them with company policy documents (e.g., GDPR).
 
-### 1. Input
-- User provides a contract clause
+It ensures:
+- AI outputs are **grounded in policy evidence**
+- No hallucinated or unsupported claims
+- Reliable results using **multi-agent verification**
 
-### 2. Hybrid Retrieval
-- Semantic search using embeddings (BGE + ChromaDB)
-- Keyword search using BM25
-- Retrieves top relevant policy chunks
+---
 
-### 3. Re-Ranking
-- Uses cross-encoder model (`ms-marco-MiniLM-L-6-v2`)
-- Selects Top 3 most relevant policy chunks
+## ✨ Features
 
-### 4. Compliance Analysis
-- LLM compares:
-  Contract Clause vs Policy Chunks
+### 📜 Contract Analysis
+- Input any contract clause
+- AI evaluates compliance against company policies
+- Supports real-world legal use cases
+
+### 🔍 Hybrid Retrieval
+- Combines:
+  - Semantic search (BGE embeddings)
+  - Keyword search (BM25)
+- Retrieves relevant policy chunks
+
+### 🎯 Re-Ranking
+- Uses **cross-encoder/ms-marco-MiniLM-L-6-v2**
+- Selects top relevant policy sections
+
+### 🤖 AI Compliance Engine
+- Powered by **Groq LLaMA 3.3 70B**
 - Outputs:
-  - Compliance (Compliant / Conflict / Missing)
+  - Compliance classification
   - Explanation
-  - Risk Score
-  - Policy Citations
+  - Risk score
+  - Policy citations
 
-### 5. Self-Refining Verification
-- Second AI agent validates:
-  - Correctness of citations
-  - Logical consistency of output
-- If incorrect, re-runs analysis (loop)
+### 🔁 Self-Refining Verification
+- Second AI agent validates output
+- Ensures logical consistency
+- Re-runs analysis if needed
 
-### 6. Guardrails
-- Ensures structured output using Pydantic
+### 🛡️ Guardrails
 - Prevents hallucinations
-- Forces policy-grounded reasoning only
+- Ensures outputs are policy-grounded
+- Structured output validation using Pydantic
 
 ---
 
-## 📤 Output
+## 🔄 System Workflow
 
-For each clause, the system returns:
-
-- Clause  
-- Compliance Result  
-- Risk Score  
-- Policy Citations (Chunk IDs)  
-- Verified AI Output  
-
----
-
-## ⭐ Key Features
-
-- Hybrid Retrieval (BM25 + Vector Search)
-- Cross-Encoder Re-Ranking for better precision
-- Multi-Agent Architecture (Analyzer + Verifier)
-- Self-Refining Loop for improved accuracy
-- Hallucination Guardrails for safe AI output
-- Risk Evaluation for legal insights
-- Policy Citation-based explanations
+1. User inputs a contract clause  
+2. Hybrid retriever finds relevant policy chunks  
+3. Cross-encoder re-ranks results  
+4. LLM analyzes compliance  
+5. Verification agent validates output  
+6. Guardrails ensure safe and structured output  
 
 ---
 
-## 🧰 Tech Stack
+## 🛠 Tech Stack
 
-- LLM: Groq (llama-3.3-70b-versatile)
-- Embeddings: BGE (bge-large-en)
-- Vector Database: ChromaDB (LangChain wrapper)
-- Retrieval: Hybrid (BM25 + Vector Search)
-- Re-Ranker: cross-encoder/ms-marco-MiniLM-L-6-v2
-- Orchestration: LangGraph
-- Backend: FastAPI
-- Frontend: Streamlit
-- Validation: Pydantic
-- Guardrails: Custom hallucination checks
+| Layer | Technology |
+|------|-----------|
+| **LLM** | Groq — LLaMA 3.3 70B Versatile |
+| **Embeddings** | BGE (bge-large-en) |
+| **Vector DB** | ChromaDB |
+| **Retrieval** | Hybrid (BM25 + Vector Search) |
+| **Re-Ranker** | cross-encoder/ms-marco-MiniLM-L-6-v2 |
+| **Pipeline** | LangGraph |
+| **Backend** | FastAPI |
+| **Frontend** | Streamlit |
+| **Validation** | Pydantic |
+| **Guardrails** | Custom hallucination checks |
 
 ---
 
 ## 📁 Project Structure
+
 ```bash
 contract-compliance-ai/
 │
-├── data/                         # Input datasets
-│   ├── policies/                # Policy documents (e.g., GDPR)
-│   └── contracts/               # Sample contract clauses
+├── data/                         # Policy & contract data
+│   ├── policies/
+│   └── contracts/
 │
-├── embeddings/                  # Embedding & vector storage logic
-│   ├── embedder.py              # BGE embedding model
-│   └── vector_store.py          # ChromaDB integration
+├── embeddings/                  # Embedding + vector DB
+│   ├── embedder.py
+│   └── vector_store.py
 │
-├── retrieval/                   # Retrieval pipeline
-│   ├── hybrid_retriever.py      # BM25 + Vector search
-│   ├── reranker.py              # Cross-encoder re-ranking
-│   └── chunk_loader.py          # Chunk loading utility
+├── retrieval/                   # Retrieval logic
+│   ├── hybrid_retriever.py
+│   ├── reranker.py
+│   └── chunk_loader.py
 │
 ├── llm_agents/                  # AI agents
-│   ├── compliance_agent.py      # Compliance analysis
-│   ├── risk_agent.py            # Risk scoring
-│   └── self_refine_agent.py     # Verification & refinement loop
+│   ├── compliance_agent.py
+│   ├── risk_agent.py
+│   └── self_refine_agent.py
 │
-├── guardrails/                  # Safety & validation
-│   └── hallucination_guard.py   # Grounding & hallucination check
+├── guardrails/                  # Safety checks
+│   └── hallucination_guard.py
 │
 ├── langgraph/                   # Pipeline orchestration
-│   ├── graph.py                 # Main workflow graph
-│   ├── nodes.py                 # Individual pipeline nodes
-│   └── state.py                 # Shared state management
+│   ├── graph.py
+│   ├── nodes.py
+│   └── state.py
 │
-├── api/                         # Backend API
-│   ├── main.py                  # FastAPI entry point
-│   └── schemas.py               # Request/response models
+├── api/                         # FastAPI backend
+│   ├── main.py
+│   └── schemas.py
 │
-├── ui/                          # Frontend
-│   └── streamlit_app.py         # Streamlit interface
+├── ui/                          # Streamlit frontend
+│   └── streamlit_app.py
 │
-├── config/                      # Configurations
-│   ├── settings.yaml            # System settings
-│   └── prompts.py               # LLM prompts
+├── config/                      # Config & prompts
+│   ├── settings.yaml
+│   └── prompts.py
 │
-├── run_pipeline.py              # Standalone pipeline runner
-├── requirements.txt             # Dependencies
-└── README.md                    # Project documentation
+├── run_pipeline.py
+├── requirements.txt
+└── README.md
 
+⚙️ Environment Setup
 
----
-## ⚙️ Setup
+Create a .env file in the root directory:
 
-```bash
+GROQ_API_KEY=your_api_key
+🚀 Getting Started
+Installation
 git clone <repo-url>
 cd contract-compliance-ai
 
@@ -149,17 +146,25 @@ python -m venv myenv
 myenv\Scripts\activate
 
 pip install -r requirements.txt
-
-Create .env file:
-
-GROQ_API_KEY=your_api_key
-▶️ Run
-Backend
+▶️ Run the Project
+🚀 Start Backend
 uvicorn api.main:app --reload
-Frontend
+💻 Run Frontend
 cd ui
 streamlit run streamlit_app.py
-Create a `.env` file in the root directory:
+🧠 AI Capabilities
+Feature	Model
+Compliance Analysis	LLaMA 3.3 70B
+Risk Evaluation	LLaMA 3.3 70B
+Retrieval Embeddings	BGE-large-en
+Re-Ranking	MiniLM Cross Encoder
+💡 Uniqueness
+Combines RAG + Multi-Agent Verification
+Uses Self-Refining Loop
+Ensures 100% policy-grounded outputs
+Includes hallucination guardrails
+Designed for enterprise legal AI systems
 
-```env
-GROQ_API_KEY=your_api_key
+## 🤝 Contributing
+
+Contributions are welcome! 🚀
