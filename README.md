@@ -26,63 +26,49 @@ It ensures:
 ### 📜 Contract Analysis
 - Input any contract clause
 - AI evaluates compliance against company policies
-- Supports real-world legal use cases
 
 ### 🔍 Hybrid Retrieval
-- Combines:
-  - Semantic search (BGE embeddings)
-  - Keyword search (BM25)
-- Retrieves relevant policy chunks
+- Semantic search (BGE embeddings)
+- Keyword search (BM25)
 
 ### 🎯 Re-Ranking
-- Uses **cross-encoder/ms-marco-MiniLM-L-6-v2**
-- Selects top relevant policy sections
+- cross-encoder/ms-marco-MiniLM-L-6-v2
 
 ### 🤖 AI Compliance Engine
-- Powered by **Groq LLaMA 3.3 70B**
-- Outputs:
-  - Compliance classification
-  - Explanation
-  - Risk score
-  - Policy citations
+- LLaMA 3.3 70B (Groq)
+- Outputs compliance, explanation, risk, citations
 
 ### 🔁 Self-Refining Verification
-- Second AI agent validates output
-- Ensures logical consistency
-- Re-runs analysis if needed
+- Validates and improves outputs
 
 ### 🛡️ Guardrails
-- Prevents hallucinations
-- Ensures outputs are policy-grounded
-- Structured output validation using Pydantic
+- Prevents hallucination
+- Ensures structured output
 
 ---
 
 ## 🔄 System Workflow
 
-1. User inputs a contract clause  
-2. Hybrid retriever finds relevant policy chunks  
-3. Cross-encoder re-ranks results  
+1. Input contract clause  
+2. Retrieve policy chunks  
+3. Re-rank results  
 4. LLM analyzes compliance  
-5. Verification agent validates output  
-6. Guardrails ensure safe and structured output  
+5. Verification loop  
+6. Guardrail validation  
 
 ---
 
 ## 🛠 Tech Stack
 
-| Layer | Technology |
-|------|-----------|
-| **LLM** | Groq — LLaMA 3.3 70B Versatile |
-| **Embeddings** | BGE (bge-large-en) |
-| **Vector DB** | ChromaDB |
-| **Retrieval** | Hybrid (BM25 + Vector Search) |
-| **Re-Ranker** | cross-encoder/ms-marco-MiniLM-L-6-v2 |
-| **Pipeline** | LangGraph |
-| **Backend** | FastAPI |
-| **Frontend** | Streamlit |
-| **Validation** | Pydantic |
-| **Guardrails** | Custom hallucination checks |
+- LLM: Groq (LLaMA 3.3 70B)
+- Embeddings: BGE-large-en
+- Vector DB: ChromaDB
+- Retrieval: Hybrid (BM25 + Vector)
+- Re-Ranker: MiniLM Cross Encoder
+- Pipeline: LangGraph
+- Backend: FastAPI
+- Frontend: Streamlit
+- Validation: Pydantic
 
 ---
 
@@ -91,54 +77,61 @@ It ensures:
 ```bash
 contract-compliance-ai/
 │
-├── data/                         # Policy & contract data
+├── data/
 │   ├── policies/
 │   └── contracts/
 │
-├── embeddings/                  # Embedding + vector DB
+├── embeddings/
 │   ├── embedder.py
 │   └── vector_store.py
 │
-├── retrieval/                   # Retrieval logic
+├── retrieval/
 │   ├── hybrid_retriever.py
 │   ├── reranker.py
 │   └── chunk_loader.py
 │
-├── llm_agents/                  # AI agents
+├── llm_agents/
 │   ├── compliance_agent.py
 │   ├── risk_agent.py
 │   └── self_refine_agent.py
 │
-├── guardrails/                  # Safety checks
+├── guardrails/
 │   └── hallucination_guard.py
 │
-├── langgraph/                   # Pipeline orchestration
+├── langgraph/
 │   ├── graph.py
 │   ├── nodes.py
 │   └── state.py
 │
-├── api/                         # FastAPI backend
+├── api/
 │   ├── main.py
 │   └── schemas.py
 │
-├── ui/                          # Streamlit frontend
+├── ui/
 │   └── streamlit_app.py
 │
-├── config/                      # Config & prompts
+├── config/
 │   ├── settings.yaml
 │   └── prompts.py
 │
 ├── run_pipeline.py
 ├── requirements.txt
 └── README.md
-'''
-⚙️ Environment Setup
+```
 
-Create a .env file in the root directory:
+---
 
+## ⚙️ Environment Setup
+
+```env
 GROQ_API_KEY=your_api_key
-🚀 Getting Started
-Installation
+```
+
+---
+
+## 🚀 Getting Started
+
+```bash
 git clone <repo-url>
 cd contract-compliance-ai
 
@@ -146,25 +139,37 @@ python -m venv myenv
 myenv\Scripts\activate
 
 pip install -r requirements.txt
-▶️ Run the Project
-🚀 Start Backend
+```
+
+---
+
+## ▶️ Run the Project
+
+### Backend
+
+```bash
 uvicorn api.main:app --reload
-💻 Run Frontend
+```
+
+### Frontend
+
+```bash
 cd ui
 streamlit run streamlit_app.py
-🧠 AI Capabilities
-Feature	Model
-Compliance Analysis	LLaMA 3.3 70B
-Risk Evaluation	LLaMA 3.3 70B
-Retrieval Embeddings	BGE-large-en
-Re-Ranking	MiniLM Cross Encoder
-💡 Uniqueness
-Combines RAG + Multi-Agent Verification
-Uses Self-Refining Loop
-Ensures 100% policy-grounded outputs
-Includes hallucination guardrails
-Designed for enterprise legal AI systems
+```
+
+---
+
+## 🧠 AI Capabilities
+
+- Compliance Analysis — LLaMA 3.3  
+- Risk Evaluation — LLaMA 3.3  
+- Retrieval — BGE embeddings  
+- Re-ranking — MiniLM cross encoder  
+
+---
+
 
 ## 🤝 Contributing
 
-Contributions are welcome! 🚀
+Contributions are welcome!
