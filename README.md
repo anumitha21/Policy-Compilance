@@ -131,7 +131,7 @@ contract-compliance-ai/
 ├── run_pipeline.py
 ├── requirements.txt
 └── README.md
-
+'''
 ⚙️ Environment Setup
 
 Create a .env file in the root directory:
