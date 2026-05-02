@@ -1,16 +1,10 @@
 # Policy Compliance AI
 
-An AI system that checks whether a company's contracts follow their internal policies — and flags what doesn't.
+An AI system that reads a company's contract clauses, checks them against internal policy documents, flags violations, scores the risk, and rewrites non-compliant clauses into corrected versions that align with the policy — all automatically.
+
+Given a contract clause, the system retrieves the most relevant sections from the company's policy, determines whether the clause is compliant, assigns a risk score, cites the exact policy sections violated, and generates a suggested rewrite of the clause that is fully aligned with the policy — preserving the original intent while fixing the violation.
 
 ---
-
-## The Problem
-
-When a company drafts or receives a contract, manually checking every clause against internal policy documents (like GDPR guidelines) is slow, error-prone, and often skipped. Non-compliant clauses go unnoticed until they become legal or financial risks.
-
-## The Solution
-
-This system takes a contract clause as input, retrieves the most relevant sections from the company's policy documents, and uses an LLM to determine whether the clause is compliant — along with a risk score and the exact policy sections that were violated.
 
 ---
 
@@ -23,6 +17,7 @@ This system takes a contract clause as input, retrieves the most relevant sectio
 - **Re-Ranking** — Re-scores retrieved chunks using a cross-encoder for higher relevance
 - **Hallucination Control** — Verifies that the AI's output is grounded in actual policy text, not invented
 - **Self-Refinement** — The AI reviews and corrects its own output up to 2 times before returning results
+- **Suggested Clause Rewrite** — For every non-compliant clause, the system generates a corrected version that preserves the original intent but rewrites it to fully comply with the policy
 - **Citation Tracking** — Every result is backed by a traceable policy chunk ID
 - **REST API** — FastAPI backend for easy integration
 - **Web UI** — Simple Streamlit interface for non-technical users
