@@ -1,175 +1,243 @@
-# 📑 Policy Compliance AI
+# Policy Compliance AI
 
-> An intelligent AI-powered system that analyzes contract clauses against company policies using Retrieval-Augmented Generation (RAG), providing compliance decisions, risk scoring, and policy-backed explanations with strong hallucination control.
-
-![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green?logo=fastapi)
-![Streamlit](https://img.shields.io/badge/Streamlit-UI-red?logo=streamlit)
-![ChromaDB](https://img.shields.io/badge/ChromaDB-VectorDB-purple)
-![Groq](https://img.shields.io/badge/Groq-LLaMA_3.3-orange)
+An AI system that checks whether a company's contracts follow their internal policies — and flags what doesn't.
 
 ---
 
-## 📌 Overview
+## The Problem
 
-**Contract Compliance AI** is a system that evaluates contract clauses by comparing them with company policy documents (e.g., GDPR).
+When a company drafts or receives a contract, manually checking every clause against internal policy documents (like GDPR guidelines) is slow, error-prone, and often skipped. Non-compliant clauses go unnoticed until they become legal or financial risks.
 
-It ensures:
-- AI outputs are **grounded in policy evidence**
-- No hallucinated or unsupported claims
-- Reliable results using **multi-agent verification**
+## The Solution
 
----
-
-## ✨ Features
-
-### 📜 Contract Analysis
-- Input any contract clause
-- AI evaluates compliance against company policies
-
-### 🔍 Hybrid Retrieval
-- Semantic search (BGE embeddings)
-- Keyword search (BM25)
-
-### 🎯 Re-Ranking
-- cross-encoder/ms-marco-MiniLM-L-6-v2
-
-### 🤖 AI Compliance Engine
-- LLaMA 3.3 70B (Groq)
-- Outputs compliance, explanation, risk, citations
-
-### 🔁 Self-Refining Verification
-- Validates and improves outputs
-
-### 🛡️ Guardrails
-- Prevents hallucination
-- Ensures structured output
+This system takes a contract clause as input, retrieves the most relevant sections from the company's policy documents, and uses an LLM to determine whether the clause is compliant — along with a risk score and the exact policy sections that were violated.
 
 ---
 
-## 🔄 System Workflow
+## Features
 
-1. Input contract clause  
-2. Retrieve policy chunks  
-3. Re-rank results  
-4. LLM analyzes compliance  
-5. Verification loop  
-6. Guardrail validation  
-
----
-
-## 🛠 Tech Stack
-
-- LLM: Groq (LLaMA 3.3 70B)
-- Embeddings: BGE-large-en
-- Vector DB: ChromaDB
-- Retrieval: Hybrid (BM25 + Vector)
-- Re-Ranker: MiniLM Cross Encoder
-- Pipeline: LangGraph
-- Backend: FastAPI
-- Frontend: Streamlit
-- Validation: Pydantic
+- **Compliance Detection** — Classifies each clause as `Compliant`, `Non-Compliant`, or `Partially Compliant`
+- **Risk Scoring** — Assigns a risk score (0–100) to each non-compliant clause
+- **Policy Evidence** — Shows the exact policy chunks that the clause was checked against
+- **Hybrid Retrieval** — Combines keyword search (BM25) and semantic search (vector embeddings) for accurate policy chunk retrieval
+- **Re-Ranking** — Re-scores retrieved chunks using a cross-encoder for higher relevance
+- **Hallucination Control** — Verifies that the AI's output is grounded in actual policy text, not invented
+- **Self-Refinement** — The AI reviews and corrects its own output up to 2 times before returning results
+- **Citation Tracking** — Every result is backed by a traceable policy chunk ID
+- **REST API** — FastAPI backend for easy integration
+- **Web UI** — Simple Streamlit interface for non-technical users
 
 ---
 
-## 📁 Project Structure
+## How It Works
 
-```bash
-contract-compliance-ai/
+```
+User inputs a contract clause
+        │
+        ▼
+Hybrid Retrieval (BM25 + Vector Search)
+→ Fetches top 5 relevant policy chunks
+        │
+        ▼
+Re-Ranking (MiniLM Cross-Encoder)
+→ Scores and sorts chunks by relevance
+        │
+        ▼
+Compliance Agent (LLaMA 3.3 70B)
+→ Compares clause vs policy chunks
+→ Returns: Compliant / Non-Compliant / Partially Compliant + explanation
+        │
+        ▼
+Risk Agent (LLaMA 3.3 70B)
+→ Assigns risk score 0–100
+        │
+        ▼
+Self-Refine Agent (2 iterations)
+→ Verifies output is accurate against policy
+→ Corrects if needed
+        │
+        ▼
+Hallucination Guard
+→ Flags any unsupported statements
+→ Validates citations against known policies
+        │
+        ▼
+Result returned to API → Displayed in UI
+```
+
+---
+
+## Project Structure
+
+```
+Policy-Compliance/
 │
 ├── data/
 │   ├── policies/
+│   │   └── GDPR-Guidance.pdf        # Company policy document
 │   └── contracts/
+│       └── sample_contract_clauses.txt  # Sample contract input
 │
 ├── embeddings/
-│   ├── embedder.py
-│   └── vector_store.py
+│   ├── embedder.py                  # BGE-large-en embedding model
+│   └── vector_store.py              # ChromaDB vector store wrapper
 │
 ├── retrieval/
-│   ├── hybrid_retriever.py
-│   ├── reranker.py
-│   └── chunk_loader.py
+│   ├── chunk_loader.py              # Loads and chunks PDF/TXT files
+│   ├── hybrid_retriever.py          # BM25 (Whoosh) + vector search
+│   └── reranker.py                  # MiniLM cross-encoder re-ranker
 │
 ├── llm_agents/
-│   ├── compliance_agent.py
-│   ├── risk_agent.py
-│   └── self_refine_agent.py
+│   ├── compliance_agent.py          # Classifies clause compliance
+│   ├── risk_agent.py                # Scores risk (0–100)
+│   ├── self_refine_agent.py         # Verifies and corrects LLM output
+│   └── citation_agent.py            # Generates policy citations
 │
 ├── guardrails/
-│   └── hallucination_guard.py
+│   ├── hallucination_guard.py       # Checks output is grounded in policy
+│   └── policy_guard.py              # Validates citations are real
 │
 ├── langgraph/
-│   ├── graph.py
-│   ├── nodes.py
-│   └── state.py
+│   ├── state.py                     # Pipeline state (Pydantic model)
+│   ├── nodes.py                     # Each pipeline step as a node
+│   └── graph.py                     # Orchestrates the full pipeline
 │
 ├── api/
-│   ├── main.py
-│   └── schemas.py
+│   ├── main.py                      # FastAPI app, /analyze_clause/ endpoint
+│   └── schemas.py                   # Request/response models
 │
 ├── ui/
-│   └── streamlit_app.py
+│   └── streamlit_app.py             # Web interface
 │
 ├── config/
-│   ├── settings.yaml
-│   └── prompts.py
+│   ├── settings.yaml                # Model names, paths, parameters
+│   └── prompts.py                   # LLM prompt templates
 │
-├── run_pipeline.py
-├── requirements.txt
-└── README.md
+├── llm_client.py                    # Groq API wrapper
+├── run_pipeline.py                  # Run pipeline directly (no API)
+└── requirements.txt
 ```
 
 ---
 
-## ⚙️ Environment Setup
+## Tech Stack
 
-```env
-GROQ_API_KEY=your_api_key
-```
+| Component | Technology |
+|---|---|
+| LLM | LLaMA 3.3 70B via Groq |
+| Embeddings | BAAI/bge-large-en-v1.5 |
+| Vector DB | ChromaDB |
+| Keyword Search | Whoosh (BM25) |
+| Re-Ranker | cross-encoder/ms-marco-MiniLM-L-6-v2 |
+| Pipeline | LangGraph |
+| Backend | FastAPI |
+| Frontend | Streamlit |
+| Validation | Pydantic |
 
 ---
 
-## 🚀 Getting Started
+## Setup
 
+**1. Clone and create environment**
 ```bash
 git clone <repo-url>
-cd contract-compliance-ai
+cd Policy-Compliance
 
 python -m venv myenv
-myenv\Scripts\activate
+myenv\Scripts\activate        # Windows
+source myenv/bin/activate     # Mac/Linux
+```
 
+**2. Install dependencies**
+```bash
 pip install -r requirements.txt
 ```
 
+**3. Set your API key**
+
+Create a `.env` file in the root:
+```
+GROQ_API_KEY=your_groq_api_key_here
+```
+
 ---
 
-## ▶️ Run the Project
+## Running the Project
 
-### Backend
-
+**Start the backend**
 ```bash
 uvicorn api.main:app --reload
 ```
 
-### Frontend
-
+**Start the frontend** (in a new terminal)
 ```bash
 cd ui
 streamlit run streamlit_app.py
 ```
 
----
-
-## 🧠 AI Capabilities
-
-- Compliance Analysis — LLaMA 3.3  
-- Risk Evaluation — LLaMA 3.3  
-- Retrieval — BGE embeddings  
-- Re-ranking — MiniLM cross encoder  
+Then open `http://localhost:8501` in your browser, paste a contract clause, and click **Analyze Clause**.
 
 ---
 
+## API
 
-## 🤝 Contributing
+**POST** `/analyze_clause/`
 
-Contributions are welcome!
+Request:
+```json
+{
+  "clause_text": "The company may share user data with third parties without explicit consent."
+}
+```
+
+Response (if non-compliant):
+```json
+{
+  "results": [
+    {
+      "clause_name": "Data Sharing Clause",
+      "compliance": "Non-Compliant",
+      "explanation": "Clause allows data sharing without consent, violating GDPR Article 6.",
+      "risk_score": "85",
+      "policy_evidence": [
+        {
+          "source": "GDPR-Guidance",
+          "chunk_id": "12",
+          "excerpt": "Personal data shall be processed lawfully... consent of the data subject."
+        }
+      ]
+    }
+  ]
+}
+```
+
+Response (if compliant):
+```json
+{ "results": [] }
+```
+
+---
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `GROQ_API_KEY` | Your Groq API key for LLaMA access |
+
+---
+
+## Notes
+
+- Only **GDPR-Guidance.pdf** is used as the policy document by default. To use a different policy, replace the file in `data/policies/` and update the path in `run_pipeline.py`.
+- The system currently flags and returns only **Non-Compliant** clauses via the API. Compliant clauses return an empty result.
+- All model names, paths, and parameters are configurable via `config/settings.yaml` — no code changes needed.
+
+---
+
+## License
+
+This project is for internal/educational use. Not intended as legal advice.
+
+---
+
+> Built with LLaMA 3.3 70B · ChromaDB · LangGraph · FastAPI · Streamlit
